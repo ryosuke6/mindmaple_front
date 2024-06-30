@@ -1,0 +1,36 @@
+name: mindmaple
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.5 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  onesignal_flutter: ^3.2.6
+  flutter_svg: ^1.0.0
+  table_calendar: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/calendar_icon.svg
+    - assets/images/graph_icon.svg
+    - assets/images/task_create_icon.svg
+    - assets/images/mindmaple_logo.png
+    - assets/images/google_logo.png
+    - assets/images/header_logo.svg
+    - assets/images/home_icon.svg
+    - assets/images/save_icon.svg
+    - assets/images/back_icon.svg
+    - assets/images/delete_icon.svg

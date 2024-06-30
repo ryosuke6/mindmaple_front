@@ -1,0 +1,105 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-hidden
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Flutter specific
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-hidden
+.flutter-settings
+.flutter_tools
+build/
+# Build outputs
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/ServiceDefinitions.json
+ios/Runner.xcworkspace/
+ios/Flutter/Flutter.podspec
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Web related
+web/assets/
+/web/index.html
+/web/manifest.json
+/web/.last_compiled.json
+
+# Dependency directories
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/libs/
+android/gradle.properties
+
+# macOS specific
+macos/Flutter/Flutter.podspec
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/.symlinks/
+
+# Windows specific
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugin_registrant.cpp
+windows/flutter/generated_plugin_registrant_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant_plugin_registrant.h
+windows/flutter/generated_plugin_registrant_plugin_registrant.cpp
+windows/runner/flutter_window.cpp
+windows/runner/flutter_window.h
+windows/runner/generated_plugin_registrant.cc
+windows/runner/generated_plugin_registrant.h
+
+# Linux specific
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugin_registrant.h
+linux/flutter/generated_plugin_registrant.cpp
+linux/flutter/generated_plugin_registrant_plugin_registrant.cc
+linux/flutter/generated_plugin_registrant_plugin_registrant.h
+linux/flutter/generated_plugin_registrant_plugin_registrant.cpp
+
+# Flutter generated metadata
+.flutter
+.ios/
+.flutter_tool/
+.flutter-plugins
+.packages
+.flutter-plugins-dependencies
