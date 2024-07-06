@@ -73,11 +73,6 @@ class HomeScreen extends StatelessWidget {
                 color: const Color(0xFF3D9AC7),
               ),
               TaskList(
-                title: '今週のタスク',
-                tasks: weekTasks,
-                color: const Color(0xFFC67945),
-              ),
-              TaskList(
                 title: '直近の優先タスク',
                 tasks: priorityTasks,
                 color: const Color(0xFFE77070),

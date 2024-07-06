@@ -11,7 +11,7 @@ class LoginScreen extends StatelessWidget {
           children: <Widget>[
             Image.asset('assets/images/mindmaple_logo.png', width: 500),
             LoginButton(
-              text: 'ログインしないで使う',
+              text: 'メールアドレスでログイン',
               color: Colors.green,
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/home');
