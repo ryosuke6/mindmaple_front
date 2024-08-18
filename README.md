@@ -36,6 +36,26 @@ MindMapleは、ユーザーがタスクやスケジュールを効率的に管�
     flutter run
     ```
 
+## ビルド方法
+
+### Android
+
+1. リリース用のビルドを作成します:
+    ```bash
+    flutter build apk --release
+    ```
+
+2. `build/app/outputs/flutter-apk/app-release.apk` に生成されたAPKファイルが保存されます。
+
+### iOS
+
+1. iOS用のリリースビルドを作成します:
+    ```bash
+    flutter build ios --release
+    ```
+
+2. Xcodeを使用してアーカイブし、App Storeにアップロードします。
+
 ## 使い方
 
 1. エミュレーターや物理デバイスでアプリを起動します。
