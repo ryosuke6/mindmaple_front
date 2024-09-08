@@ -13,30 +13,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MindMaple',
       theme: ThemeData(
         primaryColor: Colors.green,
-        primarySwatch: Colors.green,
-        backgroundColor: Color(0xFFFFF3D9),
-        textTheme: TextTheme(
-          bodyText1: TextStyle(color: Color(0xFF333333)),
-          bodyText2: TextStyle(color: Color(0xFF666666)),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            primary: Colors.green, // Button color
-            onPrimary: Colors.white, // Text color
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle:
+              TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: Colors.green, width: 2.0),
           ),
+          // ... 他のスタイル設定 ...
         ),
+        // ... 他のテーマ設定 ...
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => LoginScreen(),
-        '/home': (context) => HomeScreen(),
-        '/calendar': (context) => CalendarScreen(),
-        '/graph': (context) => GraphScreen(),
-        '/task_create': (context) => TaskCreateScreen(),
-      },
+      home: TaskCreateScreen(),
     );
   }
 }
