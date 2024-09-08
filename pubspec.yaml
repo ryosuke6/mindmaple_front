@@ -10,11 +10,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # UI関連
   cupertino_icons: ^1.0.2
-  onesignal_flutter: ^3.2.6
-  flutter_svg: ^1.0.0
-  table_calendar: ^3.0.0
-  fl_chart: ^0.40.0
+  flutter_svg: ^2.0.5
+  table_calendar: ^3.0.9
+
+  # 状態管理
+  provider: ^6.0.5
+
+  # グラフ描画
+  fl_chart: ^0.63.0  # グラフ表示のために使用
+
+  # プッシュ通知
+  onesignal_flutter: ^5.0.0
 
 dev_dependencies:
   flutter_test:

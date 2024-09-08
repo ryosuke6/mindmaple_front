@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mindmaple/components/icon_nav.dart';
 import 'package:mindmaple/components/header.dart';
 import 'package:mindmaple/constants.dart';
+import 'package:mindmaple/models/task_priority.dart';
 import 'dart:math';
 
 class GraphScreen extends StatefulWidget {
@@ -14,39 +15,59 @@ class _GraphScreenState extends State<GraphScreen> {
   DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
-  late Map<DateTime, Map<String, int>> _taskData;
-  late Map<DateTime, Map<String, int>> _weekTaskData;
+  late Map<DateTime, TaskData> _taskData;
+  late Map<DateTime, TaskData> _weekTaskData;
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime.now();
     _updateTaskData();
-    _updateWeekTaskData();
   }
 
-  void _updateTaskData() {
+  void _generateTaskData() {
     final now = DateTime.now();
     _taskData = {
-      DateTime(now.year, now.month, 10): {'high': 5, 'medium': 3, 'low': 3},
-      DateTime(now.year, now.month, 20): {'high': 4, 'medium': 3, 'low': 5},
-      DateTime(now.year, now.month, 25): {'high': 2, 'medium': 1, 'low': 4},
-      DateTime(now.year, now.month, 28): {'high': 1, 'medium': 3, 'low': 2},
+      DateTime(now.year, now.month, 10): TaskData({
+        TaskPriority.high: 5,
+        TaskPriority.medium: 3,
+        TaskPriority.low: 3,
+      }),
+      DateTime(now.year, now.month, 20): TaskData({
+        TaskPriority.high: 4,
+        TaskPriority.medium: 3,
+        TaskPriority.low: 5,
+      }),
+      DateTime(now.year, now.month, 25): TaskData({
+        TaskPriority.high: 2,
+        TaskPriority.medium: 1,
+        TaskPriority.low: 4,
+      }),
+      DateTime(now.year, now.month, 28): TaskData({
+        TaskPriority.high: 1,
+        TaskPriority.medium: 3,
+        TaskPriority.low: 2,
+      }),
     };
     print('Task data updated: $_taskData'); // デバッグ用
   }
 
-  void _updateWeekTaskData() {
+  void _generateWeekTaskData() {
     final startOfWeek =
         _focusedDay.subtract(Duration(days: _focusedDay.weekday - 1));
     _weekTaskData = {
       for (int i = 0; i < 7; i++)
-        startOfWeek.add(Duration(days: i)): {
-          'high': _generateRandomTaskCount(3),
-          'medium': _generateRandomTaskCount(4),
-          'low': _generateRandomTaskCount(3),
-        }
+        startOfWeek.add(Duration(days: i)): TaskData({
+          TaskPriority.high: _generateRandomTaskCount(3),
+          TaskPriority.medium: _generateRandomTaskCount(4),
+          TaskPriority.low: _generateRandomTaskCount(3),
+        })
     };
+  }
+
+  void _updateTaskData() {
+    _generateTaskData();
+    _generateWeekTaskData();
   }
 
   int _generateRandomTaskCount(int maxCount) {
@@ -63,7 +84,6 @@ class _GraphScreenState extends State<GraphScreen> {
         _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + delta, 1);
       }
       _updateTaskData();
-      _updateWeekTaskData();
     });
   }
 
@@ -175,8 +195,9 @@ class _GraphScreenState extends State<GraphScreen> {
     return Row(
       children: List.generate(7, (index) {
         DateTime currentDay = startOfWeek.add(Duration(days: index));
-        Map<String, int> dayData = _weekTaskData[currentDay] ?? {};
-        int totalTasks = dayData.values.fold(0, (sum, count) => sum + count);
+        TaskData dayData = _weekTaskData[currentDay] ?? TaskData({});
+        int totalTasks =
+            dayData.counts.values.fold(0, (sum, count) => sum + count);
 
         return Expanded(
           child: Container(
@@ -206,9 +227,9 @@ class _GraphScreenState extends State<GraphScreen> {
     );
   }
 
-  Widget _buildDayBar(Map<String, int> dayData, int totalTasks,
-      double taskHeight, double maxBarHeight) {
-    double barHeight = min(totalTasks * taskHeight, maxBarHeight);
+  Widget _buildDayBar(
+      TaskData dayData, int total, double taskHeight, double maxBarHeight) {
+    double barHeight = min(total * taskHeight, maxBarHeight);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4),
       child: Column(
@@ -218,12 +239,12 @@ class _GraphScreenState extends State<GraphScreen> {
             height: barHeight,
             child: Column(
               children: [
-                _buildPrioritySegment(
-                    dayData['high'] ?? 0, AppColors.highPriority, taskHeight),
-                _buildPrioritySegment(dayData['medium'] ?? 0,
+                _buildPrioritySegment(dayData.counts[TaskPriority.high] ?? 0,
+                    AppColors.highPriority, taskHeight),
+                _buildPrioritySegment(dayData.counts[TaskPriority.medium] ?? 0,
                     AppColors.mediumPriority, taskHeight),
-                _buildPrioritySegment(
-                    dayData['low'] ?? 0, AppColors.lowPriority, taskHeight),
+                _buildPrioritySegment(dayData.counts[TaskPriority.low] ?? 0,
+                    AppColors.lowPriority, taskHeight),
               ],
             ),
           ),
@@ -376,29 +397,31 @@ class _GraphScreenState extends State<GraphScreen> {
   }
 
   Widget _buildTaskGraph(DateTime day) {
-    Map<String, int> dayData = _taskData.entries
-        .firstWhere((entry) => isSameDay(entry.key, day),
-            orElse: () => MapEntry(day, {}))
-        .value;
+    TaskData dayData = _taskData[day] ?? TaskData({});
 
-    if (dayData.isEmpty) return SizedBox();
+    if (dayData.counts.isEmpty) return SizedBox();
 
-    int total = dayData.values.reduce((a, b) => a + b);
+    int total = dayData.counts.values.reduce((a, b) => a + b);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        _buildTaskBar(TaskPriority.high, dayData.counts[TaskPriority.high] ?? 0,
+            total, AppColors.highPriority),
         _buildTaskBar(
-            'high', dayData['high'] ?? 0, total, AppColors.highPriority),
-        _buildTaskBar(
-            'medium', dayData['medium'] ?? 0, total, AppColors.mediumPriority),
-        _buildTaskBar('low', dayData['low'] ?? 0, total, AppColors.lowPriority),
+            TaskPriority.medium,
+            dayData.counts[TaskPriority.medium] ?? 0,
+            total,
+            AppColors.mediumPriority),
+        _buildTaskBar(TaskPriority.low, dayData.counts[TaskPriority.low] ?? 0,
+            total, AppColors.lowPriority),
       ],
     );
   }
 
-  Widget _buildTaskBar(String priority, int count, int total, Color color) {
+  Widget _buildTaskBar(
+      TaskPriority priority, int count, int total, Color color) {
     double height = count / total * 50;
     return Container(
       width: 10,
@@ -474,8 +497,8 @@ class _GraphScreenState extends State<GraphScreen> {
       itemBuilder: (context, index) {
         DateTime currentHour = DateTime(
             _focusedDay.year, _focusedDay.month, _focusedDay.day, index);
-        Map<String, int> hourData = _getDayTaskData(currentHour);
-        int total = hourData.values.fold(0, (sum, count) => sum + count);
+        TaskData hourData = _getDayTaskData(currentHour);
+        int total = hourData.counts.values.fold(0, (sum, count) => sum + count);
 
         return Container(
           width: MediaQuery.of(context).size.width / 8,
@@ -503,8 +526,8 @@ class _GraphScreenState extends State<GraphScreen> {
     );
   }
 
-  Widget _buildHourlyBar(Map<String, int> hourData, int total,
-      double taskHeight, double maxBarHeight) {
+  Widget _buildHourlyBar(
+      TaskData hourData, int total, double taskHeight, double maxBarHeight) {
     return LayoutBuilder(
       builder: (context, constraints) {
         double barHeight = min(total * taskHeight, maxBarHeight);
@@ -517,12 +540,18 @@ class _GraphScreenState extends State<GraphScreen> {
                 height: barHeight,
                 child: Column(
                   children: [
-                    _buildPrioritySegment(hourData['high'] ?? 0,
-                        AppColors.highPriority, taskHeight),
-                    _buildPrioritySegment(hourData['medium'] ?? 0,
-                        AppColors.mediumPriority, taskHeight),
-                    _buildPrioritySegment(hourData['low'] ?? 0,
-                        AppColors.lowPriority, taskHeight),
+                    _buildPrioritySegment(
+                        hourData.counts[TaskPriority.high] ?? 0,
+                        AppColors.highPriority,
+                        taskHeight),
+                    _buildPrioritySegment(
+                        hourData.counts[TaskPriority.medium] ?? 0,
+                        AppColors.mediumPriority,
+                        taskHeight),
+                    _buildPrioritySegment(
+                        hourData.counts[TaskPriority.low] ?? 0,
+                        AppColors.lowPriority,
+                        taskHeight),
                   ],
                 ),
               ),
@@ -533,12 +562,12 @@ class _GraphScreenState extends State<GraphScreen> {
     );
   }
 
-  Map<String, int> _getDayTaskData(DateTime hour) {
-    return {
-      'high': hour.hour % 3,
-      'medium': (hour.hour + 1) % 4,
-      'low': (hour.hour + 2) % 5,
-    };
+  TaskData _getDayTaskData(DateTime hour) {
+    return TaskData({
+      TaskPriority.high: hour.hour % 3,
+      TaskPriority.medium: (hour.hour + 1) % 4,
+      TaskPriority.low: (hour.hour + 2) % 5,
+    });
   }
 }
 

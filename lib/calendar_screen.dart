@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mindmaple/components/icon_nav.dart';
 import 'package:mindmaple/components/header.dart';
+import 'package:mindmaple/models/task_data.dart'; // ダミータスクデータをインポート
+
+const int numColumns = 8; // 列数
+const double cellHeight = 100.0; // セルの高さ
+const double cellWidthFactor = 8.0; // セルの幅を計算するための因子
+
+enum CalendarFormat { month, week, twoWeeks }
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -13,25 +20,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   // ダミータスクデータ
-  List<TaskData> _tasks = [
-    TaskData(
-      title: 'タスク名1',
-      startTime: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 10),
-      endTime: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 11),
-    ),
-    TaskData(
-      title: 'タスク名2',
-      startTime: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 12),
-      endTime: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 14),
-    ),
-  ];
+  List<TaskData> _tasks = getDummyTasks();
 
   @override
   Widget build(BuildContext context) {
-    double cellWidth = MediaQuery.of(context).size.width / 8; // 8列に変更
+    double cellWidth = MediaQuery.of(context).size.width / cellWidthFactor;
 
     return Scaffold(
-      appBar: const Header(title: 'MindMaple'), // Headerコンポーネントを使用
+      appBar: const Header(title: 'MindMaple'),
       body: Column(
         children: [
           IconNav(
@@ -63,128 +59,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 16.0, bottom: 16.0), // 上部にパディングを追加
+            padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: _calendarFormat == CalendarFormat.month ? Colors.green : Colors.grey, // アクティブ/非アクティブの色
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _calendarFormat = CalendarFormat.month;
-                    });
-                  },
-                  child: Text('月表示'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: _calendarFormat == CalendarFormat.week ? Colors.green : Colors.grey, // アクティブ/非アクティブの色
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _calendarFormat = CalendarFormat.week;
-                    });
-                  },
-                  child: Text('週表示'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: _calendarFormat == CalendarFormat.twoWeeks ? Colors.green : Colors.grey, // アクティブ/非アクティブの色
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _calendarFormat = CalendarFormat.twoWeeks;
-                    });
-                  },
-                  child: Text('日表示'),
-                ),
+                _buildCalendarButton('月表示', CalendarFormat.month),
+                _buildCalendarButton('週表示', CalendarFormat.week),
+                _buildCalendarButton('日表示', CalendarFormat.twoWeeks),
               ],
             ),
           ),
           if (_calendarFormat == CalendarFormat.month) ...[
-            Container(
-              color: Colors.green, // 背景色を緑に設定
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_left, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
-                      });
-                    },
-                  ),
-                  Text(
-                    '${_focusedDay.year}年 ${_focusedDay.month}月',
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.arrow_right, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              color: Color(0xFFE8F5E9), // 薄い緑の背景色を設定
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildWeekDay('月', cellWidth, Colors.black),
-                  _buildWeekDay('火', cellWidth, Colors.black),
-                  _buildWeekDay('水', cellWidth, Colors.black),
-                  _buildWeekDay('木', cellWidth, Colors.black),
-                  _buildWeekDay('金', cellWidth, Colors.black),
-                  _buildWeekDay('土', cellWidth, Colors.blue), // 土曜日の文字色を青色に変更
-                  _buildWeekDay('日', cellWidth, Colors.red), // 日曜日の文字色を赤色に変更
-                ],
-              ),
-            ),
+            _buildMonthHeader(),
+            _buildWeekDaysRow(cellWidth),
           ],
           if (_calendarFormat == CalendarFormat.week) ...[
-            Container(
-              color: Colors.green, // 背景色を緑に設定
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_left, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        _focusedDay = _focusedDay.subtract(Duration(days: 7));
-                      });
-                    },
-                  ),
-                  Text(
-                    '${_focusedDay.year}年 ${_focusedDay.month}月 ${getWeekOfMonth(_focusedDay)}週',
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.arrow_right, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        _focusedDay = _focusedDay.add(Duration(days: 7));
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
+            _buildWeekHeader(),
           ],
           Expanded(
             child: _calendarFormat == CalendarFormat.week
@@ -193,6 +83,104 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ? _buildDayView(cellWidth)
                     : _buildMonthView(),
           ),
+        ],
+      ),
+    );
+  }
+
+  ElevatedButton _buildCalendarButton(String text, CalendarFormat format) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: _calendarFormat == format ? Colors.green : Colors.grey,
+      ),
+      onPressed: () {
+        setState(() {
+          _calendarFormat = format;
+        });
+      },
+      child: Text(text),
+    );
+  }
+
+  Widget _buildMonthHeader() {
+    return Container(
+      color: Colors.green,
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_left, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+              });
+            },
+          ),
+          Text(
+            '${_focusedDay.year}年 ${_focusedDay.month}月',
+            style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          IconButton(
+            icon: Icon(Icons.arrow_right, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekHeader() {
+    return Container(
+      color: Colors.green,
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_left, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                _focusedDay = _focusedDay.subtract(Duration(days: 7));
+              });
+            },
+          ),
+          Text(
+            '${_focusedDay.year}年 ${_focusedDay.month}月 ${getWeekOfMonth(_focusedDay)}週',
+            style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          IconButton(
+            icon: Icon(Icons.arrow_right, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                _focusedDay = _focusedDay.add(Duration(days: 7));
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekDaysRow(double cellWidth) {
+    return Container(
+      color: Color(0xFFE8F5E9),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildWeekDay('月', cellWidth, Colors.black),
+          _buildWeekDay('火', cellWidth, Colors.black),
+          _buildWeekDay('水', cellWidth, Colors.black),
+          _buildWeekDay('木', cellWidth, Colors.black),
+          _buildWeekDay('金', cellWidth, Colors.black),
+          _buildWeekDay('土', cellWidth, Colors.blue),
+          _buildWeekDay('日', cellWidth, Colors.red),
         ],
       ),
     );
@@ -218,23 +206,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.green), // 枠線を緑に設定
+          border: Border.all(color: Colors.green),
           color: _selectedDay != null && isSameDay(day, _selectedDay!)
               ? Colors.green[200]
               : isCurrentMonth
                   ? Colors.transparent
-                  : Colors.grey[300], // 前月・来月の日付はグレーの背景色
+                  : Colors.grey[300],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end, // 下揃え
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             if (isCurrentMonth) ..._buildTasksForDay(day),
             Text(
               '${day.day}',
               style: TextStyle(
-                fontWeight: FontWeight.bold, // 日付の文字を太く
-                color:
-                    isCurrentMonth ? Colors.black : Colors.grey, // 前月・来月の日付はグレーの文字色
+                fontWeight: FontWeight.bold,
+                color: isCurrentMonth ? Colors.black : Colors.grey,
               ),
             ),
           ],
@@ -250,29 +237,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   List<Widget> _buildTasksForDay(DateTime day) {
-    // ダミータスクデータ
     List<String> tasks = [
       '非常に長いタスク名1',
       'タスク名2',
       'タスク名3',
     ];
 
-    // 任意の日付にタスクを追加する
     if (day.day == 10 || day.day == 20) {
       return tasks
           .map((task) => Container(
                 margin: EdgeInsets.symmetric(vertical: 2.0),
                 padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                 decoration: BoxDecoration(
-                  color: Colors.green, // 背景色を追加
-                  borderRadius: BorderRadius.circular(10), // 角を丸くする
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   task,
-                  style: TextStyle(
-                      fontSize: 10, color: Colors.white), // テキストの色を白に設定
+                  style: TextStyle(fontSize: 10, color: Colors.white),
                   overflow: TextOverflow.ellipsis,
-                  softWrap: true, // テキストを折り返し表示
+                  softWrap: true,
                 ),
               ))
           .toList();
@@ -303,15 +287,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7,
-        childAspectRatio: 1.0, // 正方形にするためのアスペクト比
-        mainAxisExtent: 100, // マスの高さを100pxに設定
+        childAspectRatio: 1.0,
+        mainAxisExtent: cellHeight,
       ),
-      itemCount:
-          daysInMonthWithLeadingBlanks(_focusedDay) + trailingBlanks(_focusedDay),
+      itemCount: daysInMonthWithLeadingBlanks(_focusedDay) +
+          trailingBlanks(_focusedDay),
       itemBuilder: (context, index) {
         if (index < leadingBlanks(_focusedDay)) {
-          DateTime prevMonthDay = DateTime(_focusedDay.year, _focusedDay.month, 1)
-              .subtract(Duration(days: leadingBlanks(_focusedDay) - index));
+          DateTime prevMonthDay =
+              DateTime(_focusedDay.year, _focusedDay.month, 1)
+                  .subtract(Duration(days: leadingBlanks(_focusedDay) - index));
           return _buildDayContainer(prevMonthDay, isCurrentMonth: false);
         } else if (index >=
             leadingBlanks(_focusedDay) + daysInMonth(_focusedDay)) {
@@ -339,31 +324,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
         Row(
           children: [
             Container(
-              width: cellWidth, // 時間表示用の幅を設定
+              width: cellWidth,
               height: 60,
               color: Color(0xFFE8F5E9),
             ),
-            Container(
-              color: Color(0xFFE8F5E9), // 薄い緑の背景色を設定
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildWeekDay('月', cellWidth, Colors.black),
-                  _buildWeekDay('火', cellWidth, Colors.black),
-                  _buildWeekDay('水', cellWidth, Colors.black),
-                  _buildWeekDay('木', cellWidth, Colors.black),
-                  _buildWeekDay('金', cellWidth, Colors.black),
-                  _buildWeekDay('土', cellWidth, Colors.blue), // 土曜日の文字色を青色に変更
-                  _buildWeekDay('日', cellWidth, Colors.red), // 日曜日の文字色を赤色に変更
-                ],
-              ),
-            ),
+            _buildWeekDaysRow(cellWidth),
           ],
         ),
         Row(
           children: [
             Container(
-              width: cellWidth, // 時間表示用の幅を設定
+              width: cellWidth,
               height: 60,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.green),
@@ -395,14 +366,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
             children: [
               GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 8, // 8列に変更
-                  mainAxisExtent: 100, // ここで高さを指定
+                  crossAxisCount: numColumns,
+                  mainAxisExtent: cellHeight,
                   childAspectRatio: 1.0,
                 ),
-                itemCount: 24 * 8, // 8列分に変更
+                itemCount: 24 * numColumns,
                 itemBuilder: (context, index) {
-                  int hour = index ~/ 8;
-                  int dayIndex = index % 8;
+                  int hour = index ~/ numColumns;
+                  int dayIndex = index % numColumns;
                   if (dayIndex == 0) {
                     return Container(
                       alignment: Alignment.center,
@@ -415,7 +386,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     );
                   } else {
-                    DateTime day = startOfWeek.add(Duration(days: dayIndex - 1));
+                    DateTime day =
+                        startOfWeek.add(Duration(days: dayIndex - 1));
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -425,7 +397,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.green),
-                          color: _selectedDay != null && isSameDay(day, _selectedDay!)
+                          color: _selectedDay != null &&
+                                  isSameDay(day, _selectedDay!)
                               ? Colors.green[200]
                               : Colors.transparent,
                         ),
@@ -434,7 +407,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   }
                 },
               ),
-              ..._tasks.map((task) => _buildTaskWidget(task, cellWidth)).toList(),
+              ..._tasks
+                  .map((task) => _buildTaskWidget(task, cellWidth))
+                  .toList(),
             ],
           ),
         ),
@@ -443,11 +418,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildDayView(double cellWidth) {
-    DateTime startOfDay = DateTime(_focusedDay.year, _focusedDay.month, _focusedDay.day);
+    DateTime startOfDay =
+        DateTime(_focusedDay.year, _focusedDay.month, _focusedDay.day);
     return Column(
       children: [
         Container(
-          color: Colors.green, // 背景色を緑に設定
+          color: Colors.green,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -478,23 +454,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
         ),
-
         Expanded(
           child: Stack(
             children: [
               GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1, // 1列に変更
-                  mainAxisExtent: 100, // ここで高さを指定
+                  crossAxisCount: 1,
+                  mainAxisExtent: cellHeight,
                   childAspectRatio: 1.0,
                 ),
-                itemCount: 24, // 24時間分
+                itemCount: 24,
                 itemBuilder: (context, index) {
                   int hour = index;
                   return Row(
                     children: [
                       Container(
-                        width: cellWidth, // 時間表示用の幅を設定
+                        width: cellWidth,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.green),
@@ -515,7 +490,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   );
                 },
               ),
-              ..._tasks.where((task) => isSameDay(task.startTime, startOfDay)).map((task) => _buildTaskWidget(task, cellWidth)).toList(),
+              ..._tasks
+                  .where((task) => isSameDay(task.startTime, startOfDay))
+                  .map((task) => _buildTaskWidget(task, cellWidth))
+                  .toList(),
             ],
           ),
         ),
@@ -526,24 +504,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildTaskWidget(TaskData task, double cellWidth) {
     int startHour = task.startTime.hour;
     int endHour = task.endTime.hour;
-    double topOffset = startHour * 100.0;
-    double height = (endHour - startHour) * 100.0;
+    double topOffset = startHour * cellHeight;
+    double height = (endHour - startHour) * cellHeight;
 
     return Positioned(
       top: topOffset,
-      left: cellWidth, // タスク表示部分を時間表示部分の横に配置
+      left: cellWidth,
       child: Container(
-        width: MediaQuery.of(context).size.width - cellWidth, // タスク表示部分の幅を調整
+        width: MediaQuery.of(context).size.width - cellWidth,
         height: height,
         margin: EdgeInsets.symmetric(horizontal: 1.0, vertical: 2.0),
         padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
         decoration: BoxDecoration(
-          color: Colors.green, // 背景色を追加
-          borderRadius: BorderRadius.circular(10), // 角を丸くする
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           task.title,
-          style: TextStyle(fontSize: 10, color: Colors.white), // テキストの色を白に設定
+          style: TextStyle(fontSize: 10, color: Colors.white),
           overflow: TextOverflow.ellipsis,
           softWrap: true,
         ),
@@ -558,13 +536,3 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return weekOfMonth;
   }
 }
-
-class TaskData {
-  final String title;
-  final DateTime startTime;
-  final DateTime endTime;
-
-  TaskData({required this.title, required this.startTime, required this.endTime});
-}
-
-enum CalendarFormat { month, week, twoWeeks }

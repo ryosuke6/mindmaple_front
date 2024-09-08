@@ -19,10 +19,10 @@ class TaskList extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: color, width: 2), // 枠線の色を設定
+          side: BorderSide(color: color, width: 2),
         ),
         elevation: 4,
-        color: Colors.white, // 背景色を白に設定
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -37,33 +37,37 @@ class TaskList extends StatelessWidget {
                 ),
               ),
               Divider(color: color),
-              ...tasks.map((task) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0), // 間隔を広げる
-                child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/task_create',
-                    arguments: task,
-                  ),
-                  child: Container(
-                    width: double.infinity, // 幅を最大に広げる
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: color), // 枠線の色を設定
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      task,
-                      textAlign: TextAlign.center, // テキストを中央揃えにする
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: color,
-                      ),
-                    ),
-                  ),
-                ),
-              )),
+              ...tasks.map((task) => _buildTaskItem(context, task, color)),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskItem(BuildContext context, String task, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/task_create',
+          arguments: task,
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: color),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Text(
+            task,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: color,
+            ),
           ),
         ),
       ),
